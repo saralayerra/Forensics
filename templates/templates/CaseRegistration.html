@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Registration</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.0/web3.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background: #343a40;
+            color: white;
+            text-align: center;
+            line-height: 60px;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px;
+            width: 200px;
+            height: calc(100% - 60px);
+            background: #222;
+            padding-top: 20px;
+            color: white;
+        }
+        .sidebar button {
+            width: 100%;
+            padding: 15px;
+            background: #444;
+            border: none;
+            color: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+        }
+        .sidebar button:hover {
+            background: #666;
+        }
+        .main {
+            margin-left: 220px;
+            padding: 20px;
+            width: calc(100% - 240px);
+            margin-top: 80px;
+            overflow-y: auto;
+        }
+        .form-container {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px gray;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background: #343a40;
+            color: white;
+        }
+        .forensic-btn { background-color: blue; color: white; }
+        .stego-btn { background-color: rgb(250, 5, 103); color: white; }
+    </style>
+</head>
+<body>
+    <div class="header">Case Registration</div>
+    <div class="sidebar">
+        <button onclick="showForm('newCaseForm')">New Case</button>
+        <button onclick="showForm('updateCaseForm')">Update Case</button>
+        <button onclick="showForm('viewCaseForm')">View Case</button>
+        <button onclick="showForm('viewAllCasesForm')">View All Cases</button>
+    </div>
+    <div class="main">
+        <div id="newCaseForm" class="form-container">
+            <h2>Register New Case</h2>
+            <input type="number" id="caseId" placeholder="Case ID">
+            <input type="text" id="caseTitle" placeholder="Case Title">
+            <input type="text" id="description" placeholder="Description">
+            <select id="caseType">
+                <option value="0">Criminal</option>
+                <option value="1">Civil</option>
+                <option value="2">Fraud</option>
+                <option value="3">Other</option>
+            </select>
+            <input type="text" id="suspect" placeholder="Suspect">
+            <input type="text" id="investigator" placeholder="Investigator">
+            <button onclick="registerCase()">Register Case</button>
+        </div>
+        <div id="updateCaseForm" class="form-container">
+            <h2>Update Case</h2>
+            <input type="number" id="updateCaseId" placeholder="Case ID">
+            <select id="status">
+                <option value="0">Open</option>
+                <option value="1">Investigating</option>
+                <option value="2">Closed</option>
+            </select>
+            <input type="text" id="evidence" placeholder="Evidence (if any)">
+            <button onclick="updateCase()">Update Case</button>
+        </div>
+        <div id="viewCaseForm" class="form-container">
+            <h2>View Case</h2>
+            <input type="number" id="viewCaseId" placeholder="Case ID">
+            <button onclick="viewCase()">View</button>
+            <div class="output" id="caseOutput"></div>
+        </div>
+        <div id="viewAllCasesForm" class="form-container">
+            <h2>View All Cases</h2>
+            <button onclick="viewAllCases()">View All Cases</button>
+            <table id="allCasesOutput">
+                <thead>
+                    <tr>
+                        <th>Case ID</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Suspect</th>
+                        <th>Investigator</th>
+                        <th>Status</th>
+                        <th>Evidence</th>
+                        <th>Forensic Analyst</th>
+                        <th>Stegoanalyst</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        let web3 = new Web3("http://127.0.0.1:7545"); // Ganache RPC URL
+        let contractAddress = "0x22DA47DF7DE47e54cf4b18e103e02771a55a3A2B"; // Replace with deployed contract address
+        let contractABI = [
+        {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "caseId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "caseTitle",
+          "type": "string"
+        }
+      ],
+      "name": "CaseCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "caseId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum CaseRegistration.CaseStatus",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "evidence",
+          "type": "string"
+        }
+      ],
+      "name": "CaseUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_caseId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_caseTitle",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_description",
+          "type": "string"
+        },
+        {
+          "internalType": "enum CaseRegistration.CaseType",
+          "name": "_caseType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "_suspect",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_investigator",
+          "type": "string"
+        }
+      ],
+      "name": "newCase",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_caseId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum CaseRegistration.CaseStatus",
+          "name": "_status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "_evidence",
+          "type": "string"
+        }
+      ],
+      "name": "updateCase",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_caseId",
+          "type": "uint256"
+        }
+      ],
+      "name": "viewCase",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "enum CaseRegistration.CaseType",
+          "name": "",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "enum CaseRegistration.CaseStatus",
+          "name": "",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "viewAllCases",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "caseId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "caseTitle",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "enum CaseRegistration.CaseType",
+              "name": "caseType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "suspect",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "investigator",
+              "type": "string"
+            },
+            {
+              "internalType": "enum CaseRegistration.CaseStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "evidence",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "evidenceExists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct CaseRegistration.Case[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    }
+        ];
+        let contract = new web3.eth.Contract(contractABI, contractAddress);
+        let ownerAccount = "0x0E544c68AB30dD8dd78ae653F6486492CAd55643"; // Replace with your Ganache account
+
+        function showForm(formId) {
+            document.querySelectorAll('.form-container').forEach(form => form.style.display = 'none');
+            document.getElementById(formId).style.display = 'block';
+        }
+
+        async function registerCase() {
+    let caseId = document.getElementById("caseId").value;
+    let caseTitle = document.getElementById("caseTitle").value;
+    let description = document.getElementById("description").value;
+    let caseType = document.getElementById("caseType").value;
+    let suspect = document.getElementById("suspect").value;
+    let investigator = document.getElementById("investigator").value;
+
+    const accounts = await web3.eth.getAccounts();
+    let userAccount = accounts[0];  // Use the first available account
+
+    let contract = new web3.eth.Contract(contractABI, contractAddress);
+
+    try {
+        await contract.methods.newCase(
+            caseId, caseTitle, description, caseType, suspect, investigator
+        ).send({ from: userAccount, gas: 3000000 });
+
+
+        alert("Case registered successfully!");
+    } catch (error) {
+        console.error(error);
+        alert("Error in case registration. Check the console.");
+    }
+}
+
+
+        async function updateCase() {
+            let caseId = document.getElementById("updateCaseId").value;
+            let status = document.getElementById("status").value;
+            let evidence = document.getElementById("evidence").value;
+
+            await contract.methods.updateCase(caseId, status, evidence)
+                .send({ from: ownerAccount, gas: 3000000 });
+            alert("Case Updated Successfully!");
+        }
+
+        async function viewCase() {
+            let caseId = document.getElementById("viewCaseId").value;
+            let result = await contract.methods.viewCase(caseId).call();
+            document.getElementById("caseOutput").innerHTML =
+                `Case ID: ${result[0]}<br>
+                 Title: ${result[1]}<br>
+                 Description: ${result[2]}<br>
+                 Type: ${["Criminal", "Civil", "Fraud", "Other"][result[3]]}<br>
+                 Suspect: ${result[4]}<br>
+                 Investigator: ${result[5]}<br>
+                 Status: ${["Open", "Investigating", "Closed"][result[6]]}<br>
+                 Evidence: ${result[7]}`;
+        }
+
+        async function viewAllCases() {
+            let results = await contract.methods.viewAllCases().call();
+            let tableBody = document.querySelector("#allCasesOutput tbody");
+            tableBody.innerHTML = "";
+            results.forEach(caseData => {
+                let row = `<tr>
+                    <td>${caseData.caseId}</td>
+                    <td>${caseData.caseTitle}</td>
+                    <td>${caseData.description}</td>
+                    <td>${["Criminal", "Civil", "Fraud", "Other"][caseData.caseType]}</td>
+                    <td>${caseData.suspect}</td>
+                    <td>${caseData.investigator}</td>
+                    <td>${["Open", "Investigating", "Closed"][caseData.status]}</td>
+                    <td>${caseData.evidenceExists ? caseData.evidence : "No Evidence"}</td>
+                    <td><button class="forensic-btn" onclick="window.location.href = 'autopsy.html'">Go</button></td>
+                    <td><button class="stego-btn" onclick="window.location.href='http://127.0.0.1:5000/decode'">Go</button></td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+    </script>
+</body>
+</html>

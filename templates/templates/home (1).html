@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Case Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
+    <script src="script.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4;  }
+        .container { width: 50%; margin: auto; padding: 20px; background: white; box-shadow: 0px 0px 10px gray; border-radius: 10px; margin-top: 50px; }
+        input, button, select, textarea { display: block; width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; }
+        button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .link { color: #007bff; cursor: pointer; margin-top: 10px; display: inline-block; }
+        .hidden { display: none; }
+        .dashboard-container { display: flex; height: 100vh; }
+        .sidebar { width: 250px; background: #333; color: white; padding: 15px; display: flex; flex-direction: column; }
+        .sidebar button { background: #007bff; color: white; border: none; padding: 10px; margin: 5px 0; cursor: pointer; }
+        .sidebar button:hover { background: #0056b3; }
+        .main-content { flex-grow: 1; padding: 20px; background: rgb(197, 240, 238); }
+        footer {
+            margin: 0;
+            padding: 0;
+        }
+        
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #0a2472;
+            margin-bottom: 5px;
+            text-align: left;  /* Ensures label is aligned to the left */
+            display: block;  /* Ensures it takes full width of the parent */
+        }
+        .header { 
+            color: white;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+        }
+        #LoginAndReg {
+            background-image: url('./images/BG1.jpeg'); /* Replace with the actual image URL */
+            background-size: cover; /* Ensures the image covers the entire container */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents the image from repeating */
+            padding: 20px;
+            border-radius: 10px;
+        }
+        input{
+            width: 98%;
+            max-width: 700px;
+        }
+        
+    </style>
+</head>
+<body id="LoginAndReg">
+
+    <!-- Header Section -->
+<div class="header" style="font-size: 40px;">TraceForensics</div>
+
+<!-- Register Section -->
+<div class="container" id="registerSection">
+    <h2>Register</h2>
+    <input type="text" id="regName" placeholder="Name">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="text" id="regPhone" placeholder="Phone">
+    <input type="password" id="regPassword" placeholder="Password">
+    <select id="regRole">
+        <option value="" disabled selected>Select Role</option>
+        <option value="Suspect">Suspect</option>
+        <option value="Investigator">Investigator</option>
+        <option value="ForensicAnalyst">Forensic Analyst</option>
+        <option value="StegoAnalyst">Stego Analyst</option>
+        <option value="HigherAuthority">Higher Authority</option>
+    </select>
+    <button onclick="registerUser()">Register</button>
+    <p class="link" onclick="showLogin()">Already have an account? Login here</p>
+</div>
+
+<!-- Login Section -->
+<div class="container hidden" id="loginSection">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="loginUser()">Login</button>
+    <p class="link" onclick="showRegister()">Don't have an account? Register here</p>
+</div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="hidden">
+        <div class="header">
+            Welcome, <span id="userName"></span> | UserID: <span id="userId"></span> | Email: <span id="userEmail"></span> | Role: <span id="userRole"></span>
+        </div>
+        <div class="dashboard-container">
+            <div class="sidebar">
+                <button data-target="workProfile">Work Profile</button>
+                <button data-target="caseForm">New Case</button>
+                <button data-target="updateCaseForm">Update Case</button>
+                <button data-target="viewCaseForm">View Case</button>
+                <button data-target="viewAllCasesForm">View All Cases</button>
+                <button data-target="emailForm">Send Email</button>
+                <button data-target="viewMails">Inbox</button>
+                <button onclick="logoutUser()">Logout</button>
+            </div>
+            <div class="main-content" id="mainContent">
+
+                <!-- Case Registration Section -->
+                <div class="container hidden" id="caseForm">
+                    <h2>Case Registration</h2>
+                    <input type="text" id="caseTitle" placeholder="Case Title">
+                    <input type="text" id="caseDesc" placeholder="Description">
+                    <input type="text" id="caseSuspect" placeholder="Suspect">
+                    <input type="text" id="caseInvestigator" placeholder="Investigator">
+                    <button onclick="registerCase()">Submit Case</button>
+                </div>
+
+                <!-- Email Section -->
+    <div class="container" id="emailForm">
+        <h2>Send Email</h2>
+
+        <div class="input-group">
+            <label for="senderEmail">From</label>
+            <input type="email" id="senderEmail" value="chendhurthilachababu@gmail.com" disabled>
+        </div>
+
+        <div class="input-group">
+            <label for="receiverEmail">To</label>
+            <input type="email" id="receiverEmail" placeholder="Receiver Email">
+        </div>
+
+        <div class="input-group">
+            <label for="emailSubject">Subject</label>
+            <input type="text" id="emailSubject" placeholder="Subject">
+        </div>
+
+        <div class="input-group">
+            <label for="emailBody">Message</label>
+            <textarea id="emailBody" placeholder="Email Body"></textarea>
+        </div>
+
+        <button onclick="sendEmail()">Send Email</button>
+    </div>
+
+                <!-- View Mails -->
+                <div class="container hidden" id="viewMails">
+                    <input type="email" id="viewSenderEmail" disabled>
+                    <button onclick="getSentMails()">Sent Mails</button>
+                    <button onclick="getReceivedMails()">Received Mails</button>
+                    <div id="mailsList"></div>
+                </div>
+
+                <!-- Update Case -->
+                <div class="container hidden" id="updateCaseForm">
+                    <h2>Update Case</h2>
+                    <input type="number" id="updateCaseId" placeholder="Case ID">
+                    <select id="status">
+                        <option value="0">Open</option>
+                        <option value="1">Investigating</option>
+                        <option value="2">Closed</option>
+                    </select>
+                    <input type="text" id="evidence" placeholder="Evidence (if any)">
+                    <button onclick="updateCase()">Update Case</button>
+                </div>
+
+                <!-- View Case -->
+                <div class="container hidden" id="viewCaseForm">
+                    <h2>View Case</h2>
+                    <input type="number" id="viewCaseId" placeholder="Case ID">
+                    <button onclick="viewCase()">View</button>
+                    <div class="output" id="caseOutput"></div>
+                </div>
+
+                <!-- View All Cases -->
+                <div class="container hidden" id="viewAllCasesForm">
+                    <h2>View All Cases</h2>
+                    <button onclick="viewAllCases()">View All Cases</button>
+                    <table id="allCasesOutput">
+                        <thead>
+                            <tr>
+                                <th>Case ID</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Suspect</th>
+                                <th>Investigator</th>
+                                <th>Status</th>
+                                <th>Evidence</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.querySelector(".sidebar").addEventListener("click", function (e) {
+    if (e.target.tagName === "BUTTON") {
+        const targetId = e.target.dataset.target;
+        
+        if (targetId === "workProfile") {
+            const role = document.getElementById("userRole").innerText.trim();
+            const rolePages = {
+                "Suspect": "suspect.html",
+                "Investigator": "CaseRegistration.html",
+                "ForensicAnalyst": "autopsy.html",
+                "StegoAnalyst": "http://127.0.0.1:5000/decode",
+                "HigherAuthority": "CaseDetails.html"
+            };
+
+            if (rolePages[role]) {
+                // Create an iframe only inside a specific div
+                let workProfileDiv = document.getElementById("workProfileContainer");
+                if (!workProfileDiv) {
+                    workProfileDiv = document.createElement("div");
+                    workProfileDiv.id = "workProfileContainer";
+                    workProfileDiv.style.width = "100%";
+                    workProfileDiv.style.height = "100%";
+                    workProfileDiv.innerHTML = `<iframe src="${rolePages[role]}" width="100%" height="100%" style="border: none;"></iframe>`;
+                    document.getElementById("mainContent").appendChild(workProfileDiv);
+                }
+                // Show only workProfile and hide other sections
+                document.querySelectorAll(".container").forEach(el => el.classList.add("hidden"));
+                workProfileDiv.classList.remove("hidden");
+            } else {
+                document.getElementById("mainContent").innerHTML = `<h2>No profile page assigned for this role.</h2>`;
+            }
+        } else {
+            // Hide all containers and show the selected one, keeping workProfileContainer
+            document.querySelectorAll(".container").forEach(el => el.classList.add("hidden"));
+            const workProfileDiv = document.getElementById("workProfileContainer");
+            if (workProfileDiv) workProfileDiv.classList.add("hidden"); // Hide iframe
+            
+            document.getElementById(targetId).classList.remove("hidden");
+        }
+    }
+});
+
+
+</script>  
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judicial Case Report System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.0/web3.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+           /* background-color: #ccc;*/
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .icon {
+            width: 100px;
+            height: 100px;
+        }
+        .form-section {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="images/higher Authority.jpg" alt="Case Icon" class="icon">
+        <h1>Judicial Case Report System</h1>
+        <div id="connectionStatus" style="font-weight: bold; color: red;">Connecting...</div>
+        <div class="form-section">
+            <input type="number" id="viewCaseId" placeholder="Enter Case ID">
+            <button onclick="viewCase()">View Case</button>
+            <div id="caseDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        let web3;
+        let contractInstance;
+        let contractAddress = "0x912AD5100e288E307752154D6a7F58De7E938e31";
+        let contractABI = [{
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "caseId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum PoliceCaseRegistry.CaseType",
+          "name": "caseType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "suspect",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "investigator",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum PoliceCaseRegistry.Status",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "name": "CaseRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "caseId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum PoliceCaseRegistry.Status",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "evidence",
+          "type": "string"
+        }
+      ],
+      "name": "CaseUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_description",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_caseType",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_suspect",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_investigator",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_status",
+          "type": "uint256"
+        }
+      ],
+      "name": "registerCase",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_status",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_evidence",
+          "type": "string"
+        }
+      ],
+      "name": "updateCase",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "viewCaseDetails",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "viewAllCases",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "",
+          "type": "string[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "",
+          "type": "string[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "",
+          "type": "string[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "",
+          "type": "string[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    }
+  ];
+
+        window.addEventListener('load', async () => {
+            try {
+                web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
+                contractInstance = new web3.eth.Contract(contractABI, contractAddress);
+
+                // Check connection
+                const accounts = await web3.eth.getAccounts();
+                if (accounts.length > 0) {
+                    document.getElementById("connectionStatus").innerText = "Connected to Ganache!";
+                    document.getElementById("connectionStatus").style.color = "green";
+                } else {
+                    throw new Error("No accounts found.");
+                }
+            } catch (error) {
+                console.error("Connection failed:", error);
+                document.getElementById("connectionStatus").innerText = "Connection failed!";
+                document.getElementById("connectionStatus").style.color = "red";
+            }
+        });
+
+        async function viewCase() {
+            let caseId = document.getElementById("viewCaseId").value;
+            if (!caseId) {
+                alert("Please enter a case ID.");
+                return;
+            }
+            try {
+                let caseDetails = await contractInstance.methods.getCaseDetails(caseId).call();
+                document.getElementById("caseDetails").innerHTML = `
+                    <p><strong>Case ID:</strong> ${caseDetails.id}</p>
+                    <p><strong>Title:</strong> ${caseDetails.title}</p>
+                    <p><strong>Status:</strong> ${caseDetails.status}</p>
+                `;
+            } catch (error) {
+                console.error("Error fetching case details:", error);
+                document.getElementById("caseDetails").innerHTML = "<p style='color:red;'>Error fetching case details.</p>";
+            }
+        }
+    </script>
+</body>
+</html>

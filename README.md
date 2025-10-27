@@ -32,74 +32,72 @@ To overcome these challenges, <strong>TraceForensics</strong> integrates forensi
 
 <p>
 By merging the robustness of forensic analysis with blockchain’s security framework, TraceForensics strengthens the accuracy, integrity, and legal reliability of cybercrime investigations. This approach not only improves digital evidence management but also supports law enforceme
-<h2>3. Case Management and Evidence Collection</h2>
+<h2>Case Management and Evidence Collection</h2>
 <p>
 The system enables investigators to create and manage digital crime cases with structured metadata, including <strong>case ID</strong>, <strong>status</strong>, <strong>suspect information</strong>, and detailed incident descriptions. 
 Evidence is collected from seized storage devices using forensic tools such as <em>Autopsy</em>, which is integrated into our system to automate the retrieval of deleted or hidden files.
 </p>
 
-<h3>3.2 Steganography-Based Hidden Data Detection</h3>
+<h3>Steganography-Based Hidden Data Detection</h3>
 <p>
 Once image-based evidence is collected, the system applies advanced <strong>steganalysis techniques</strong> to detect and decode hidden messages or illicit information embedded within images using 
 <strong>Least Significant Bit (LSB)</strong> or transform domain methods. This process allows forensic analysts to uncover concealed data that conventional forensic software might overlook.
 </p>
 
-<h3>3.3 Blockchain-Enabled Evidence Logging</h3>
+<h3>Blockchain-Enabled Evidence Logging</h3>
 <p>
 To ensure data integrity and non-repudiation, decoded content and other forensic artifacts are <strong>hashed and stored on a private blockchain ledger</strong>. 
 Each ledger transaction contains a cryptographic hash of the evidence, a timestamp, the case ID, and the role of the user performing the action. 
 This creates an <strong>immutable audit trail</strong>, preventing tampering or unauthorized alterations throughout the investigation lifecycle.
 </p>
 
-<h3>3.4 Role-Based Access and Chain of Custody</h3>
+<h3>Role-Based Access and Chain of Custody</h3>
 <p>
 The platform employs a <strong>Role-Based Access Control (RBAC)</strong> mechanism to assign privileges to forensic analysts, investigators, steganographers, and judicial authorities. 
 Every action taken on a piece of evidence is logged and verifiable, maintaining a <strong>transparent chain of custody</strong> that is crucial for legal admissibility.
 </p>
 
-<h3>3.5 Evidence Visualization and Reporting</h3>
+<h3>Evidence Visualization and Reporting</h3>
 <p>
 Investigators can view decoded content, generate <strong>court-admissible reports</strong>, and present the blockchain-backed forensic timeline to judicial authorities. 
 A user-friendly interface ensures easy navigation, while backend services handle cryptographic operations and real-time data verification.
 </p>
 
-<h3>3.6 Notification and Collaboration</h3>
+<h3> Notification and Collaboration</h3>
 <p>
 The system facilitates collaboration between investigators, analysts, and legal entities by generating notifications for case updates, evidence uploads, and blockchain transactions. 
 This ensures that all stakeholders remain informed and aligned throughout the investigation.
-</p>
 
-<h3>3.7 Modules of Approach for TraceForensics</h3>
 <p>
 The proposed blockchain-based cybercrime investigation system consists of three main modules:
 <strong>User Registration Module</strong>, <strong>Case Entry Module</strong>, and <strong>Evidence Management Module</strong>. 
 These components collectively ensure secure and tamper-proof handling of digital evidence, leveraging blockchain’s transparency and immutability.
 </p>
 
-<h4>3.7.1 Architecture for User Module</h4>
+
 <p>
 Only authorized users registered by the administrator can access the system. 
 This module enforces authentication and maintains the integrity of user roles within the TraceForensics platform.
 </p>
 
-<h4>3.7.2 Architecture of Case Entry Module</h4>
+
 <p>
 In the Case Entry Module, investigators can enter details of ongoing cases. 
 These records are securely stored on the blockchain, ensuring that all information remains immutable and accessible only to authorized personnel. 
 This module enables efficient organization and management of case-related data.
 </p>
-<p align="center"><em>Figure 2. Case Entry Module</em></p>
 
-<h4>3.7.3 Architecture of Evidence Management Module</h4>
+
+
 <p>
 The Evidence Management Module is central to the investigation process. 
 Suspects may use steganography and delete the resulting images from their systems. 
 Forensic analysts can <strong>retrieve deleted images</strong> using <em>Autopsy</em>, after which steganographers <strong>extract hidden messages</strong> from the recovered files. 
 Investigators then upload this digital evidence and store it securely on the blockchain.
 </p>
-<p align="center"><em>Figure 3. Evidence Management Module</em></p>
 
-<h3>3.8 LSB Steganography for Decoding Hidden Content</h3>
+
+<h3>LSB Steganography for Decoding Hidden Content</h3>
 <p><strong>Algorithm 1: Decoding Text from an Encoded Image</strong></p>
 
 <pre>
@@ -134,19 +132,19 @@ Investigators then upload this digital evidence and store it securely on the blo
    - Display or return the hidden text message.
 </pre>
 
-<h3>3.9 Implementation</h3>
+<h3>Implementation</h3>
 <p>
 To address the challenges highlighted earlier, TraceForensics integrates <strong>steganography</strong>, <strong>digital forensics</strong>, and <strong>blockchain-based evidence management</strong> to create a secure framework for digital investigations.
 </p>
 
-<h4>A. Forensic Tool: Autopsy</h4>
+<h4>Forensic Tool: Autopsy</h4>
 <p>
 <em>Autopsy</em>, an open-source forensic tool, plays a crucial role in retrieving deleted files and analyzing them forensically. 
 The process begins by creating a new case, specifying the target storage device or directory, and scanning it to extract metadata and recover deleted files. 
 Autopsy’s ability to restore lost data ensures that vital digital evidence is preserved and available for deeper analysis.
 </p>
 
-<h4>B. Blockchain-Based Evidence Management</h4>
+<h4>Blockchain-Based Evidence Management</h4>
 <p>
 All recovered and decoded evidence is hashed and stored on a private blockchain network. 
 This blockchain implementation guarantees <strong>immutability</strong>, <strong>data provenance</strong>, and <strong>traceability</strong> of evidence throughout its lifecycle, reinforcing the credibility of digital forensic investigations.
